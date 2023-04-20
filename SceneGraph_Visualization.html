@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <title>Scene Graph Visualization</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+  <style>
+    #info {
+      color: #fff;
+      position: absolute;
+      bottom: 15px;
+      left: 15px;
+      text-align: left;
+    }
+
+    #sceneInfo{
+      color: #fff;
+      position:absolute;
+      text-align: right;
+      bottom: 15px;
+      right: 15px;
+      font-size:25px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- <h1 id="info">Movement: ↑ ↓ → ←<br>
+                Rotation: < ><br>
+                Left Arm Controls: Q W E R<br>
+                Right Arm Controls: A S D F<br>
+                Claws: C V</h1>
+
+  <h1 id="sceneInfo">Scene Graph Visualization<br>
+                    The scene graph is a data <br>
+                    structure that displays the <br>
+                    relation between objects in the scene<br>
+                  in this example the claws are<br>
+                   children of the upper arm, which<br>
+                    is a child of the lower arm, and so on. </h1> -->
+  
+
+
+  <script type="module">
+    import * as THREE from './js/build/three.module.js';
+
+    import Arm from './js/arm.js';
+    import Text from './js/text.js';
+    import Body from './js/body.js';
+
+    var container;
+    var leftArm;
+    var rightArm;
+    var body;
+    var rightText, leftText;
+    var textOffset = 0;
+    var camera, scene, renderer;
+
+    var mouseX = 0, mouseY = 0;
+    var windowHalfX = window.innerWidth / 2;
+    var windowHalfY = window.innerHeight / 2;
+
+    init();
+    animate();
+
+    renderer.setPixelRatio( window.devicePixelRatio );
+    
+    function init() {
+
+      container = document.createElement('div');
+      document.body.appendChild(container);
+
+      camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+      camera.position.z = 400;
+      camera.position.y = 200;
+
+      scene = new THREE.Scene();
+      setupObjects(scene);
+      setupLighting(scene);
+
+      renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      container.appendChild(renderer.domElement);
+
+      // user interaction
+      document.addEventListener('mousemove', onDocumentMouseMove, false);
+      document.addEventListener('keyup', onKeyUp, false);
+      document.addEventListener('keydown', onKeyDown, false);
+
+      // window resize
+      window.addEventListener('resize', onWindowResize, false);
+
+    }
+
+    function setupLighting(scene) {
+      scene.background = new THREE.Color(  0x000000 );
+      const light = new THREE.DirectionalLight(0xffffff, 1.2);
+      light.position.set(-30, 30, 20);
+      scene.add(new THREE.AmbientLight(0x404040));
+      scene.add(light);
+    }
+
+    function setupObjects(scene) {
+      rightText = new Text(50);
+      scene.add(rightText);
+
+      leftText = new Text(-50);
+      scene.add(leftText);
+
+      body = new Body();
+      scene.add(body);
+
+      leftArm = new Arm();
+      leftArm.Arm.position.set(-body.bodySize.x * 0.5, body.bodySize.y * 0.2 + 1, 0);
+      leftArm.Arm.rotateZ(1.57);
+      scene.add(leftArm);
+
+      rightArm = new Arm();
+      rightArm.Arm.position.set(body.bodySize.x * 0.5, body.bodySize.y * 0.2 + 1, 0);
+      rightArm.Arm.rotateZ(-1.57);
+      scene.add(rightArm);
+
+      // Adding bodyparts as children of body
+      body.add(rightArm)
+      body.add(leftArm)
+    }
+
+    function animate() {
+      requestAnimationFrame(animate);
+      try {
+        // arm.animate();
+      } catch (e) { }
+      render();
+    }
+
+    function onWindowResize() {
+      windowHalfX = window.innerWidth / 2;
+      windowHalfY = window.innerHeight / 2;
+
+      camera.aspect = window.innerWidth / window.innerHeight;
+      camera.updateProjectionMatrix();
+
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+
+    function onKeyUp(event) {
+      switch (event.keyCode) {
+         // forward arrow
+         case 38:
+          body.position.z -= 5
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // left arrow
+        case 37:
+          body.position.x -= 5
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // right arrow
+        case 39:
+          body.position.x += 5
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // back arrow
+        case 40:
+          body.position.z += 5
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // < rotate counterclockwise
+        case 190:
+          body.rotation.y += 0.05
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // > rotate clockwise
+        case 188:
+          body.rotation.y -= 0.05
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // c for closing pincers
+        case 67:
+          leftArm.pincerClose();
+          rightArm.pincerClose();
+
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // v for opening pincers
+        case 86:
+          leftArm.pincerOpen();
+          rightArm.pincerOpen();
+
+          rightText.PincersStop(textOffset);
+          leftText.PincersStop(textOffset);
+          rightText.UpperArmStop(textOffset);
+          leftText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          rightText.BaseStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // q rotates left upper arm
+        case 81:
+          leftArm.rotateUpperArm();
+
+          leftText.UpperArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // w rotates left upper arm back
+        case 87:
+          leftArm.rotateUpperArmBack();
+
+          leftText.UpperArmStop(textOffset);
+          leftText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // e for left lower arm
+        case 69:
+          leftArm.rotateLowerArm();
+
+          leftText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+        // r rotates left lower arm back
+        case 82:
+          leftArm.rotateLowerArmBack();
+
+          leftText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+          // a rotates right upper arm
+        case 65:
+          rightArm.rotateUpperArm();
+
+          rightText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+          // s rotates right upper arm back
+        case 83:
+          rightArm.rotateUpperArmBack();
+
+          rightText.UpperArmStop(textOffset);
+          rightText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+          // d for right lower arm
+        case 68:
+          rightArm.rotateLowerArm();
+
+          rightText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+           // f for right lower arm back
+        case 70:
+          rightArm.rotateLowerArmBack();
+
+          rightText.LowerArmStop(textOffset);
+          leftText.BaseStop(textOffset);
+          break;
+          default:
+          return;
+      }
+    }
+
+    function onKeyDown(event) {
+      switch (event.keyCode) {
+        // forward arrow
+        case 38:
+          body.position.z -= 5
+        
+          rightText.PincersFlash(textOffset);
+          leftText.PincersFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // left arrow
+        case 37:
+          body.position.x -= 5
+          rightText.PincersFlash(textOffset);
+          leftText.PincersFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // right arrow
+        case 39:
+          body.position.x += 5
+          rightText.PincersFlash(textOffset);
+          leftText.PincersFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // back arrow
+        case 40:
+          body.position.z += 5
+          rightText.PincersFlash(textOffset);
+          leftText.PincersFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // < rotate counterclockwise
+        case 190:
+          body.rotation.y += 0.05
+          leftText.PincersFlash(textOffset);
+          rightText.PincersFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          break;
+        // > rotate clockwise
+        case 188:
+          body.rotation.y -= 0.05
+          leftText.PincersFlash(textOffset);
+          rightText.PincersFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          break;
+        // c for closing pincers
+        case 67:
+          leftArm.pincerClose();
+          rightArm.pincerClose();
+
+          rightText.PincersFlash(textOffset);
+          leftText.PincersFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // v for opening pincers
+        case 86:
+          leftArm.pincerOpen();
+          rightArm.pincerOpen();
+
+          rightText.PincersFlash(textOffset);
+          leftText.PincersFlash(textOffset);
+          rightText.UpperArmFlash(textOffset);
+          leftText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          rightText.BaseFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // q rotates left upper arm
+        case 81:
+          leftArm.rotateUpperArm();
+
+          leftText.UpperArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // w rotates left upper arm back
+        case 87:
+          leftArm.rotateUpperArmBack();
+
+          leftText.UpperArmFlash(textOffset);
+          leftText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // e for left lower arm
+        case 69:
+          leftArm.rotateLowerArm();
+
+          leftText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+        // r rotates left lower arm back
+        case 82:
+          leftArm.rotateLowerArmBack();
+
+          leftText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+          // a rotates right upper arm
+        case 65:
+          rightArm.rotateUpperArm();
+
+          rightText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+          // s rotates right upper arm back
+        case 83:
+          rightArm.rotateUpperArmBack();
+
+          rightText.UpperArmFlash(textOffset);
+          rightText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+          // d for right lower arm
+        case 68:
+          rightArm.rotateLowerArm();
+
+          rightText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+           // f for right lower arm
+        case 70:
+          rightArm.rotateLowerArmBack();
+
+          rightText.LowerArmFlash(textOffset);
+          leftText.BaseFlash(textOffset);
+          break;
+          default:
+          return;
+      }
+    }
+
+    function onDocumentMouseMove(event) {
+      mouseX = (event.clientX - windowHalfX) / 2;
+      mouseY = (event.clientY - windowHalfY) / 2;
+    }
+
+    function render() {
+      camera.position.x += (mouseX - camera.position.x) * 0.5;
+      camera.position.y += (-mouseY - camera.position.y) * 0.5;
+
+      camera.lookAt(0, 0, 0);
+      renderer.render(scene, camera);
+    }
+
+  </script>
+
+</body>
+
+</html>c
